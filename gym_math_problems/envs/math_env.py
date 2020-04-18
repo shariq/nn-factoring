@@ -251,6 +251,8 @@ class MathEnv(gym.Env):
             # got the right answer; congrats
             reward_whole_right = 3.0
             reward += reward_whole_right
+            if self.verbose:
+                print('done=True because you won!')
             done = True
         
         if self.verbose > 1:
@@ -270,11 +272,7 @@ class MathEnv(gym.Env):
 
         # wrong mask, in current action
         np.add(self.step_unconfidents, self.step_rights, out=self.step_wrongs)
-        print('np.add(self.step_unconfidents, self.step_rights, out=self.step_wrongs)')
-        print('self.step_unconfidents={}; self.step_rights={}, self.step_wrongs={}'.format(self.step_unconfidents, self.step_rights, self.step_wrongs))
         np.subtract(1, self.step_wrongs, self.step_wrongs)
-        print('np.subtract(1, self.step_wrongs, self.step_wrongs)')
-        print('self.step_wrongs={}'.format(self.step_wrongs))
 
         # if a character is wrong this time, and it was right last time, add reward of -2.0 (will combine with below)
         np.bitwise_and(self.step_wrongs, self.previous_rights, out=self.step_reward_wrong_was_right)
@@ -285,20 +283,10 @@ class MathEnv(gym.Env):
 
         # if a character is ever wrong, no matter what it was last time, add a reward of -(abs(right-wrong)/base + 1.0)
         np.subtract(self.correct_action, action, out=self.step_reward_error)
-        print('np.subtract(self.correct_action, action, out=self.step_reward_error)')
-        print('self.correct_action={}; action={}; self.step_reward_error={}'.format(self.correct_action, action, self.step_reward_error))
         np.divide(self.step_reward_error, self.base, out=self.step_reward_error)
-        print('np.divide(self.step_reward_error, self.base, out=self.step_reward_error)')
-        print('self.base={}; self.step_reward_error={}'.format(self.base, self.step_reward_error))
         np.abs(self.step_reward_error, out=self.step_reward_error)
-        print('np.abs(self.step_reward_error, out=self.step_reward_error)')
-        print('self.step_reward_error={}'.format(self.step_reward_error))
         np.add(1.0, self.step_reward_error, out=self.step_reward_error)
-        print('np.add(1.0, self.step_reward_error, out=self.step_reward_error)')
-        print('self.step_reward_error={}'.format(self.step_reward_error))
         np.multiply(self.step_reward_error, self.step_wrongs, out=self.step_reward_error)
-        print('np.multiply(self.step_reward_error, self.step_wrongs, out=self.step_reward_error)')
-        print('self.step_reward_error={}; self.step_wrongs={}'.format(self.step_reward_error, self.step_wrongs))
         reward_error = -1.0 * np.sum(self.step_reward_error)
         if self.verbose > 1:
             print('step.reward_error=', reward_error)
@@ -307,7 +295,7 @@ class MathEnv(gym.Env):
         self.episode_total_reward += reward
         # you lose because -output_size * 20 > cumulative reward (switched whole answer back and forth ~5 times)
         if self.output_size * -20 >= self.episode_total_reward:
-            if self.verbose > 1:
+            if self.verbose:
                 print('done=True because -output_size * 20 > cumulative reward')
             done = True
 
@@ -315,7 +303,7 @@ class MathEnv(gym.Env):
         if reward < 0:
             self.steps_since_positive_reward += 1
             if self.steps_since_positive_reward >= 10000:
-                if self.verbose > 1:
+                if self.verbose:
                     print('done=True because 10k steps without +ve reward')
                 done = True
         else:
@@ -324,7 +312,7 @@ class MathEnv(gym.Env):
         # you lose because 10k * output_size steps total (not sure how you even got here; just in case there's some weird haack)
         self.steps += 1
         if self.steps >= 10000 * self.output_size:
-            if self.verbose > 1:
+            if self.verbose:
                 print('done=True because 10k * output_size steps total')
             done = True
 
@@ -338,7 +326,7 @@ class MathEnv(gym.Env):
         # self.observation_space = spaces.MultiDiscrete([base] * input_size + [base + 1] * output_size)
         np.concatenate((self.episode_question, self.last_action), out=self.observation)
 
-        if self.verbose > 1:
+        if self.verbose > 1 or (self.verbose and done):
             print('step.observation(concat(episode_question[{}], last_action[{}]))='.format(self.episode_question.shape[0], self.last_action.shape[0]), self.observation)
             print('reward={}; done={}'.format(reward, done))
 
