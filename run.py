@@ -13,16 +13,16 @@ from stable_baselines.common.evaluation import evaluate_policy
 from stable_baselines.common.math_util import safe_mean
 
 # size of LSTM
-N_LSTM = 128
+N_LSTM = 256
 # architecture of network
 # NET_ARCH = [512, 'lstm', 512]
-NET_ARCH = ['lstm', 128]
+NET_ARCH = ['lstm', 256]
 # NET_ARCH=['lstm', 512, dict(vf=[256], pi=[256])]
 # layer norm the LSTM
 LAYER_NORM = False
 
 N_TRIALS = 100
-NUM_ENVS = 32
+NUM_ENVS = 64
 NUM_EPISODES_FOR_SCORE = 10
 
 class CustomLSTMPolicy(LstmPolicy):
@@ -43,7 +43,7 @@ if __name__ == '__main__':
     env = VecNormalize(env)
     print('made envs')
 
-    model = PPO2(CustomLSTMPolicy, env, n_steps=5000, nminibatches=NUM_ENVS, lam=0.95, gamma=0.999,
+    model = PPO2(CustomLSTMPolicy, env, n_steps=32000, nminibatches=NUM_ENVS, lam=0.95, gamma=0.999,
                     noptepochs=10, ent_coef=0.0, learning_rate=3e-4, cliprange=0.2, verbose=1)
     print('initialized ppo2')
 
