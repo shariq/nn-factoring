@@ -1,2 +1,16 @@
-# gym-math-problems
-gym environment in which agent does math problems
+# nn-factoring
+
+seeing how much better than pure memorization NNs can do at factoring a semiprime `N` which is the product of two primes `p` and `q`; with the mad idea that this may lead to ideas for better non-quantum factoring algorithms
+
+
+(we don't know for sure that classical polynomial time factoring algorithms don't exist!!!)
+
+
+concepts so far:
+- make inference take a really long time, so that it's a fair match against a regular factoring algorithm compute wise. main idea to do this is include some of the answer's bits in the input to the nn as an answer hint, and then get the NN to predict just 1 bit given the problem. the predicted bit is represented by a placeholder in the answer hint. this lets you do a big search over the bit string for the answer, with the NN as a heuristic for the search
+- train a vanilla feedforward NN to keep things simple. there's some case to be made for a recurrent model (e.g, there's some long running computation which needs a state vector which is more complex than just the answer so far (because if a classical polynomial factoring algorithm exists then it's most likely not linear and so it might need to do a lot of work up front for just the first few nontrivial bits in the answer; hence a state which is more than just the answer so far))... but we'll just ignore this for now. i previously wrote code and tried training LSTMs/transformers/even an RL agent on this problem; but the potential advantages didn't feel compelling enough. plus you can just represent RNNs here as weight sharing within a deep feedforward network; and the search idea above gets at what RL could have been good for.
+- trying different ways of representing the answer. e.g, answer is the difference between `p` and `q`; answer is the smaller factor; answer is the order of some random A < N in congruency class `N` (the quantum part of shor's algorithm); answer is `p` and `q` concatenated together (for better representing the state); ...
+
+future concepts:
+- for `N` of a given bit length, find the network size/other hyperparams where it memorizes for the least amount of compute. (not sure how to even measure compute used when training.. let's just say number of ops in a forward pass * training steps?) plot best case amount of compute spent on memorizing how to factor as bit length of `N` changes (we use lots of random `N` of the same bit length each time). is this graph exponential? if yes, what's the exponent? is it better than the exponent on the general number field sieve?
+- same as above, but this time get to the point where you can factor 90% of semiprimes by searching with an equivalent amount of training compute on *each* semiprime factored. (so total compute spent on factoring is X in training; X in searching; X+X=2X for just one semiprime; and X more marginal compute for each additional semiprime) (100% is kind of arbitrary: can be extended to other ratios - there doesn't seem to be a principled way of picking this number; if you're doing just 1 semiprime wouldn't it make sense to spend 0% on training and 100% on inference? maybe not?! so you pick a number like 1k semiprimes, and minimize total compute you need to factor those?). another complication: should you try to avoid memorization by removing the semiprimes being tested from the training set?
