@@ -1,6 +1,6 @@
 # nn-factoring
 
-seeing how much better than pure memorization NNs can do at factoring a semiprime `N` which is the product of two primes `p` and `q`; with the mad idea that this may lead to ideas for better non-quantum factoring algorithms
+seeing how much better than brute-force NNs can do at factoring a semiprime `N` which is the product of two primes `p` and `q`; with the mad idea that this may lead to ideas for better non-quantum factoring algorithms
 
 
 (we don't know for sure that classical polynomial time factoring algorithms don't exist!!!)
